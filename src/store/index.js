@@ -5,14 +5,17 @@ import { createStore, applyMiddleware, combineReducers, compose } from 'redux';
 import createSagaMiddleware from 'redux-saga';
 import { createLogger } from 'redux-logger';
 
+
 // TODO: Import your reducers here
 // import tasksReducer from './reducers/tasksReducer';
 // import uiReducer from './reducers/uiReducer';
 // import usersReducer from './reducers/usersReducer';
 // import projectsReducer from './reducers/projectsReducer';
+import rootReducer from "./reducers/rootReducers";
 
 // TODO: Import your root saga
-// import rootSaga from './sagas/rootSaga';
+import rootSaga from "./sagas/rootSagas";
+
 
 // TODO: Implement the store configuration
 // Requirements:
@@ -22,11 +25,13 @@ import { createLogger } from 'redux-logger';
 // 4. Run root saga
 // 5. Enable Redux DevTools
 
-const rootReducer = combineReducers({
-  // TODO: Add your reducers here
-  // TODO: Use normalized state structure (entities, ui)
-});
+// const rootReducer = combineReducers({
+//   // TODO: Add your reducers here
+//   // TODO: Use normalized state structure (entities, ui)
+// });
 
+
+// Create Saga Middleware
 const sagaMiddleware = createSagaMiddleware();
 
 // Configure Redux Logger
@@ -38,7 +43,7 @@ const logger = createLogger({
   level: 'info',
   logErrors: true,
   predicate: (getState, action) => {
-    // Only log in development
+    // Only log in development , here need to change values of getting method from env
     return process.env.NODE_ENV === 'development';
   }
 });
@@ -52,19 +57,27 @@ const composeEnhancers =
       })
     : compose;
 
+// Middleware Array
+const middlewares = [
+  sagaMiddleware,
+];
+
+if (process.env.NODE_ENV ===
+  "development"
+) {
+  middlewares.push(logger);
+}
+
 // TODO: Create and configure store
-const store = createStore(
+export const store = createStore(
   rootReducer,
   composeEnhancers(
-    applyMiddleware(
-      sagaMiddleware,
-      logger // Logger should be last middleware
-    )
+   applyMiddleware(...middlewares)
   )
 );
 
 // TODO: Run root saga
-// sagaMiddleware.run(rootSaga);
+sagaMiddleware.run(rootSaga);
 
 export default store;
 
