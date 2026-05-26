@@ -162,15 +162,248 @@ const TaskForm = ({
 
 
   // TODO: Render dynamic fields based on task type
-  const renderDynamicFields = () => {
-    // Switch based on task type to show different fields
+
+  // Switch based on task type to show different fields
     // Bug: severity, stepsToReproduce
     // Feature: businessValue, acceptanceCriteria (array)
     // Enhancement: currentBehavior, proposedBehavior
     // Research: researchQuestions (array), expectedOutcomes
 
-    return <div>TODO: Implement dynamic fields</div>;
+const renderDynamicFields =
+  () => {
+    switch (taskType) {
+      // BUG
+  
+      case "Bug":
+        return (
+          <>
+            <div className="form-group">
+              <label>
+                Severity
+              </label>
+
+              <select
+                {...register(
+                  "severity"
+                )}
+              >
+                <option value="">
+                  Select Severity
+                </option>
+
+                <option value="Low">
+                  Low
+                </option>
+
+                <option value="Medium">
+                  Medium
+                </option>
+
+                <option value="High">
+                  High
+                </option>
+
+                <option value="Critical">
+                  Critical
+                </option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>
+                Steps To Reproduce
+              </label>
+
+              <textarea
+                placeholder={`1. Step one
+2. Step two`}
+                {...register(
+                  "stepsToReproduce"
+                )}
+              />
+            </div>
+          </>
+        );
+
+      // FEATURE
+      case "Feature":
+        return (
+          <>
+            <div className="form-group">
+              <label>
+                Business Value
+              </label>
+
+              <textarea
+                {...register(
+                  "businessValue"
+                )}
+              />
+            </div>
+
+            <div className="form-group">
+              <label>
+                Acceptance Criteria
+              </label>
+
+              {acceptanceCriteriaFields.map(
+                (
+                  field,
+                  index
+                ) => (
+                  <div
+                    key={field.id}
+                    className="array-field-row"
+                  >
+                    <input
+                      placeholder="Acceptance Criteria"
+
+                      {...register(
+                        `acceptanceCriteria.${index}.value`
+                      )}
+                    />
+
+                    <button
+                      type="button"
+                      className="remove-btn"
+                      onClick={() =>
+                        removeAcceptanceCriteria(
+                          index
+                        )
+                      }
+                    >
+                      Remove
+                    </button>
+                  </div>
+                )
+              )}
+
+              <button
+                type="button"
+                className="add-btn"
+                onClick={() =>
+                  appendAcceptanceCriteria(
+                    {
+                      value:
+                        "",
+                    }
+                  )
+                }
+              >
+                + Add Criteria
+              </button>
+            </div>
+          </>
+        );
+
+      // ENHANCEMENT
+   
+      case "Enhancement":
+        return (
+          <>
+            <div className="form-group">
+              <label>
+                Current Behaviour
+              </label>
+
+              <textarea
+                {...register(
+                  "currentBehavior"
+                )}
+              />
+            </div>
+
+            <div className="form-group">
+              <label>
+                Proposed Behaviour
+              </label>
+
+              <textarea
+                {...register(
+                  "proposedBehavior"
+                )}
+              />
+            </div>
+          </>
+        );
+
+      // RESEARCH
+   
+      case "Research":
+        return (
+          <>
+            <div className="form-group">
+              <label>
+                Research Questions
+              </label>
+
+              {researchQuestionFields.map(
+                (
+                  field,
+                  index
+                ) => (
+                  <div
+                    key={field.id}
+                    className="array-field-row"
+                  >
+                    <input
+                      placeholder="Research Question"
+
+                      {...register(
+                        `researchQuestions.${index}.value`
+                      )}
+                    />
+
+                    <button
+                      type="button"
+                      className="remove-btn"
+                      onClick={() =>
+                        removeResearchQuestion(
+                          index
+                        )
+                      }
+                    >
+                      Remove
+                    </button>
+                  </div>
+                )
+              )}
+
+              <button
+                type="button"
+                className="add-btn"
+                onClick={() =>
+                  appendResearchQuestion(
+                    {
+                      value:
+                        "",
+                    }
+                  )
+                }
+              >
+                + Add Question
+              </button>
+            </div>
+
+            <div className="form-group">
+              <label>
+                Expected Outcomes
+              </label>
+
+              <textarea
+                {...register(
+                  "expectedOutcomes"
+                )}
+              />
+            </div>
+          </>
+        );
+
+      default:
+        return null;
+    }
   };
+
 
   if (!isOpen) return null;
 
@@ -323,7 +556,7 @@ const TaskForm = ({
           </div>
 
           {/* Dynamic Fields */}
-          {/* here we can do the renderDynaicField as swicth case like case1 :bug,... rathere we can go with common  component better approach */}
+          
           {renderDynamicFields()}
 
 

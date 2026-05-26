@@ -1,8 +1,5 @@
 // Task action creators
 // TODO: Implement action creators for task management
-
-// Task action creators
-// TODO: Implement action creators for task management
 import * as types from "../types/taskTypes";
 
 export const fetchTasks = (
@@ -23,6 +20,31 @@ export const createTask = (
   payload: data,
 });
 
+export const updateTask = (
+  taskId,
+  updates
+) => ({
+  type:
+    types.UPDATE_TASK_REQUEST,
+
+  payload: {
+    taskId,
+    updates,
+  },
+});
+
+// ====================
+// DELETE
+// =========
+
+export const deleteTask = (
+  taskId
+) => ({
+  type:
+    types.DELETE_TASK_REQUEST,
+
+  payload: taskId,
+});
 // TODO: Implement action creators
 // Requirements:
 // 1. Fetch tasks with optional filters
