@@ -1,0 +1,79 @@
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+/* ARRAY FIELD */
+
+.array-field-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  margin-bottom: 10px;
+}
+
+.array-field-row input {
+  flex: 1;
+
+  padding: 10px;
+
+  border: 1px solid #d1d5db;
+
+  border-radius: 6px;
+
+  outline: none;
+}
+
+/* REMOVE BUTTON */
+
+.remove-btn {
+  color: black;
+
+  border: none;
+
+  padding: 10px 14px;
+
+  border-radius: 6px;
+
+  cursor: pointer;
+
+  white-space: nowrap;
+}
+
+.remove-btn:hover {
+  opacity: 0.9;
+}
+
+/* ADD BUTTON */
+
+.add-btn {
+  color: black;
+
+  border: none;
+
+  padding: 10px 16px;
+
+  border-radius: 6px;
+
+  cursor: pointer;
+}
+
+.add-btn:hover {
+  opacity: 0.9;
+}
+
+/* ERROR MESSAGE */
+
+.error {
+  color: red;
+
+  font-size: 13px;
+
+  margin-top: 4px;
+}

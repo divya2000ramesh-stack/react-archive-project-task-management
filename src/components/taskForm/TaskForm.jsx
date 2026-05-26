@@ -1,13 +1,22 @@
 // Dynamic Task Form Component
 // TODO: Implement complex form with React Hook Form
 
-import React from 'react';
-import * as yup from "yup";
-import { TASK_TYPES, PRIORITIES, BUG_SEVERITIES } from '../../api/mockApi';
-import { assignee, priority } from "../../../constants";
+import React, {
+  useEffect,
+  useMemo,
+  useCallback,
+} from "react";
 import { useForm, useFieldArray, useWatch } from 'react-hook-form';
 import { yupResolver } from "@hookform/resolvers/yup";
-import FormField from './FormField';
+
+import * as yup from "yup";
+import { TASK_TYPES, PRIORITIES, BUG_SEVERITIES } from '../../api/mockApi';
+import FormField from "./FormField";
+import '../../commonStyles/TaskFieldStyle.css'
+import '../../commonStyles/spinner.css'
+import { createTask } from "../../store/actions/taskActions";
+import { useDispatch } from "react-redux";
+import { assignee, priority } from "../../../constants";
 
 // TODO: Implement TaskForm component
 // Requirements:
@@ -17,6 +26,10 @@ import FormField from './FormField';
 // 4. Integration with Redux for data and state
 // 5. Auto-save functionality
 // 6. File attachment simulation
+// ==========================
+// Validation Schema
+// ==========================
+
 const schema = yup.object({
   title: yup
     .string()
@@ -67,10 +80,9 @@ const defaultValues = {
   researchQuestions: [],
 };
 
-
 const TaskForm = ({
   isOpen,
-  mode, // 'create' or 'edit'
+  mode = "create", // 'create' or 'edit'
   initialData = null,
   onSubmit,
   onClose,
@@ -79,11 +91,9 @@ const TaskForm = ({
   loading = false
 }) => {
 
-  // TODO: Setup React Hook Form with useForm hook
-  // ==========================
-  // React Hook Form
-  // ==========================
+  const dispatch = useDispatch();
 
+  // React Hook Form
   const {
     register,
     control,
@@ -100,9 +110,33 @@ const TaskForm = ({
     resolver: yupResolver(schema),
     mode: "onChange",
   });
+
+  // TODO: Setup React Hook Form with useForm hook
   // TODO: Configure defaultValues, validation mode, and form options
 
   // TODO: Setup useFieldArray for subtasks and acceptance criteria
+
+  // TODO: Watch task type and project changes for dynamic behavior
+
+  // TODO: Filter available users based on selected project
+
+  // TODO: Implement auto-save functionality to localStorage
+
+  // TODO: Restore form data from localStorage on mount
+
+  // TODO: Render dynamic fields based on task type
+  // const renderDynamicFields = () => {
+  //   // Switch based on task type to show different fields
+  //   // Bug: severity, stepsToReproduce
+  //   // Feature: businessValue, acceptanceCriteria (array)
+  //   // Enhancement: currentBehavior, proposedBehavior
+  //   // Research: researchQuestions (array), expectedOutcomes
+
+  //   return <div>TODO: Implement dynamic fields</div>;
+  // };
+
+  // Field Arrays
+
   const {
     fields: subtaskFields,
     append: appendSubtask,
@@ -140,270 +174,348 @@ const TaskForm = ({
     name: "researchQuestions",
   });
 
-  // ==========================
   // Watch Fields
-  // ==========================
 
   const taskType = useWatch({
     control,
     name: "taskType",
   });
 
+  const selectedProject =
+    useWatch({
+      control,
+      name: "projectId",
+    });
 
+  // Filter Users
 
-  // TODO: Watch task type and project changes for dynamic behavior
+  const filteredUsers =
+    useMemo(() => {
+      if (!selectedProject)
+        return users;
 
-  // TODO: Filter available users based on selected project
+      return users.filter(
+        (user) =>
+          user.projectId ===
+          selectedProject
+      );
+    }, [users, selectedProject]);
 
-  // TODO: Implement auto-save functionality to localStorage
+  useEffect(() => {
+    if (
+      mode === "edit" &&
+      initialData
+    ) {
+      reset({
+        ...defaultValues,
 
-  // TODO: Restore form data from localStorage on mount
+        ...initialData,
 
+        subtasks:
+          initialData.subtasks ||
+          [],
 
-
-  // TODO: Render dynamic fields based on task type
-
-  // Switch based on task type to show different fields
-    // Bug: severity, stepsToReproduce
-    // Feature: businessValue, acceptanceCriteria (array)
-    // Enhancement: currentBehavior, proposedBehavior
-    // Research: researchQuestions (array), expectedOutcomes
-
-const renderDynamicFields =
-  () => {
-    switch (taskType) {
-      // BUG
-  
-      case "Bug":
-        return (
-          <>
-            <div className="form-group">
-              <label>
-                Severity
-              </label>
-
-              <select
-                {...register(
-                  "severity"
-                )}
-              >
-                <option value="">
-                  Select Severity
-                </option>
-
-                <option value="Low">
-                  Low
-                </option>
-
-                <option value="Medium">
-                  Medium
-                </option>
-
-                <option value="High">
-                  High
-                </option>
-
-                <option value="Critical">
-                  Critical
-                </option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label>
-                Steps To Reproduce
-              </label>
-
-              <textarea
-                placeholder={`1. Step one
-2. Step two`}
-                {...register(
-                  "stepsToReproduce"
-                )}
-              />
-            </div>
-          </>
-        );
-
-      // FEATURE
-      case "Feature":
-        return (
-          <>
-            <div className="form-group">
-              <label>
-                Business Value
-              </label>
-
-              <textarea
-                {...register(
-                  "businessValue"
-                )}
-              />
-            </div>
-
-            <div className="form-group">
-              <label>
-                Acceptance Criteria
-              </label>
-
-              {acceptanceCriteriaFields.map(
-                (
-                  field,
-                  index
-                ) => (
-                  <div
-                    key={field.id}
-                    className="array-field-row"
-                  >
-                    <input
-                      placeholder="Acceptance Criteria"
-
-                      {...register(
-                        `acceptanceCriteria.${index}.value`
-                      )}
-                    />
-
-                    <button
-                      type="button"
-                      className="remove-btn"
-                      onClick={() =>
-                        removeAcceptanceCriteria(
-                          index
-                        )
-                      }
-                    >
-                      Remove
-                    </button>
-                  </div>
-                )
-              )}
-
-              <button
-                type="button"
-                className="add-btn"
-                onClick={() =>
-                  appendAcceptanceCriteria(
-                    {
-                      value:
-                        "",
-                    }
-                  )
-                }
-              >
-                + Add Criteria
-              </button>
-            </div>
-          </>
-        );
-
-      // ENHANCEMENT
-   
-      case "Enhancement":
-        return (
-          <>
-            <div className="form-group">
-              <label>
-                Current Behaviour
-              </label>
-
-              <textarea
-                {...register(
-                  "currentBehavior"
-                )}
-              />
-            </div>
-
-            <div className="form-group">
-              <label>
-                Proposed Behaviour
-              </label>
-
-              <textarea
-                {...register(
-                  "proposedBehavior"
-                )}
-              />
-            </div>
-          </>
-        );
-
-      // RESEARCH
-   
-      case "Research":
-        return (
-          <>
-            <div className="form-group">
-              <label>
-                Research Questions
-              </label>
-
-              {researchQuestionFields.map(
-                (
-                  field,
-                  index
-                ) => (
-                  <div
-                    key={field.id}
-                    className="array-field-row"
-                  >
-                    <input
-                      placeholder="Research Question"
-
-                      {...register(
-                        `researchQuestions.${index}.value`
-                      )}
-                    />
-
-                    <button
-                      type="button"
-                      className="remove-btn"
-                      onClick={() =>
-                        removeResearchQuestion(
-                          index
-                        )
-                      }
-                    >
-                      Remove
-                    </button>
-                  </div>
-                )
-              )}
-
-              <button
-                type="button"
-                className="add-btn"
-                onClick={() =>
-                  appendResearchQuestion(
-                    {
-                      value:
-                        "",
-                    }
-                  )
-                }
-              >
-                + Add Question
-              </button>
-            </div>
-
-            <div className="form-group">
-              <label>
-                Expected Outcomes
-              </label>
-
-              <textarea
-                {...register(
-                  "expectedOutcomes"
-                )}
-              />
-            </div>
-          </>
-        );
-
-      default:
-        return null;
+        acceptanceCriteria:
+          initialData.acceptanceCriteria?.map(
+            (item) => ({
+              value: item,
+            })
+          ) || [],
+        researchQuestions:
+          initialData.researchQuestions || [],
+      });
+    } // CREATE MODE
+    else {
+      reset(initialData);
     }
-  };
+  }, [
+    initialData,
+    mode,
+    reset,
+  ]);
 
+  // Auto Save
+  const watchedData = useWatch({
+    control,
+  });
+
+  // AUTO SAVE DRAFT
+
+  useEffect(() => {
+    localStorage.setItem(
+      "taskFormDraft",
+
+      JSON.stringify(watchedData)
+    );
+  }, [watchedData]);
+
+  // Restore Draft
+  useEffect(() => {
+    const savedDraft =
+      localStorage.getItem(
+        "taskFormDraft"
+      );
+
+    if (
+      savedDraft &&
+      mode === "create"
+    ) {
+      reset(
+        JSON.parse(savedDraft)
+      );
+    }
+  }, [mode, reset]);
+
+
+  // ==========================
+  // Dynamic Fields
+  // ==========================
+
+  const renderDynamicFields =
+    () => {
+      switch (taskType) {
+        // =====================
+        // BUG
+        // =====================
+
+        case "Bug":
+          return (
+            <>
+              <div className="form-group">
+                <label>
+                  Severity
+                </label>
+
+                <select
+                  {...register(
+                    "severity"
+                  )}
+                >
+                  <option value="">
+                    Select Severity
+                  </option>
+
+                  <option value="Low">
+                    Low
+                  </option>
+
+                  <option value="Medium">
+                    Medium
+                  </option>
+
+                  <option value="High">
+                    High
+                  </option>
+
+                  <option value="Critical">
+                    Critical
+                  </option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>
+                  Steps To Reproduce
+                </label>
+
+                <textarea
+                  placeholder={`1. Step one
+2. Step two`}
+                  {...register(
+                    "stepsToReproduce"
+                  )}
+                />
+              </div>
+            </>
+          );
+
+        // =====================
+        // FEATURE
+        // =====================
+
+        case "Feature":
+          return (
+            <>
+              <div className="form-group">
+                <label>
+                  Business Value
+                </label>
+
+                <textarea
+                  {...register(
+                    "businessValue"
+                  )}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>
+                  Acceptance Criteria
+                </label>
+
+                {acceptanceCriteriaFields.map(
+                  (
+                    field,
+                    index
+                  ) => (
+                    <div
+                      key={field.id}
+                      className="array-field-row"
+                    >
+                      <input
+                        placeholder="Acceptance Criteria"
+
+                        {...register(
+                          `acceptanceCriteria.${index}.value`
+                        )}
+                      />
+
+                      <button
+                        type="button"
+                        className="remove-btn"
+                        onClick={() =>
+                          removeAcceptanceCriteria(
+                            index
+                          )
+                        }
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  )
+                )}
+
+                <button
+                  type="button"
+                  className="add-btn"
+                  onClick={() =>
+                    appendAcceptanceCriteria(
+                      {
+                        value:
+                          "",
+                      }
+                    )
+                  }
+                >
+                  + Add Criteria
+                </button>
+              </div>
+            </>
+          );
+
+        // =====================
+        // ENHANCEMENT
+        // =====================
+
+        case "Enhancement":
+          return (
+            <>
+              <div className="form-group">
+                <label>
+                  Current Behaviour
+                </label>
+
+                <textarea
+                  {...register(
+                    "currentBehavior"
+                  )}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>
+                  Proposed Behaviour
+                </label>
+
+                <textarea
+                  {...register(
+                    "proposedBehavior"
+                  )}
+                />
+              </div>
+            </>
+          );
+
+        // =====================
+        // RESEARCH
+        // =====================
+
+        case "Research":
+          return (
+            <>
+              <div className="form-group">
+                <label>
+                  Research Questions
+                </label>
+
+                {researchQuestionFields.map(
+                  (
+                    field,
+                    index
+                  ) => (
+                    <div
+                      key={field.id}
+                      className="array-field-row"
+                    >
+                      <input
+                        placeholder="Research Question"
+
+                        {...register(
+                          `researchQuestions.${index}.value`
+                        )}
+                      />
+
+                      <button
+                        type="button"
+                        className="remove-btn"
+                        onClick={() =>
+                          removeResearchQuestion(
+                            index
+                          )
+                        }
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  )
+                )}
+
+                <button
+                  type="button"
+                  className="add-btn"
+                  onClick={() =>
+                    appendResearchQuestion(
+                      {
+                        value:
+                          "",
+                      }
+                    )
+                  }
+                >
+                  + Add Question
+                </button>
+              </div>
+
+              <div className="form-group">
+                <label>
+                  Expected Outcomes
+                </label>
+
+                <textarea
+                  {...register(
+                    "expectedOutcomes"
+                  )}
+                />
+              </div>
+            </>
+          );
+
+        default:
+          return null;
+      }
+    };
+
+  // console.log("projects",tasks)
 
   if (!isOpen) return null;
 
@@ -491,6 +603,11 @@ const renderDynamicFields =
               label="Project"
               name="projectId"
               type="select"
+              // options={[
+              //   "ECommerce Platform",
+              //   "Mobile App",
+              //   "Analytics Dashboard",
+              // ]}
               options={projects.map(
                 (project) => ({
                   label: project.name,
@@ -500,8 +617,7 @@ const renderDynamicFields =
               register={register}
               errors={errors}
             />
-
-          </div>
+            </div>
 
           <div className="form-group">
             {/* <label>Assignee</label> */}
@@ -556,7 +672,7 @@ const renderDynamicFields =
           </div>
 
           {/* Dynamic Fields */}
-          
+          {/* here we can do the renderDynaicField as swicth case like case1 :bug,... rathere we can go with common  component better approach */}
           {renderDynamicFields()}
 
 
@@ -564,6 +680,7 @@ const renderDynamicFields =
           <div className="form-group">
             {/* <label>Subtasks</label> */}
             {/* TODO: Implement field array for subtasks */}
+          
             <div className="form-group">
 
               <label>
@@ -623,7 +740,7 @@ const renderDynamicFields =
             <button type="button" onClick={onClose}>
               Cancel
             </button>
-            <button type="submit" disabled={loading}>
+            <button type="submit" disabled={loading || !isValid}>
               {loading ? (<><span className="spinner" />Saving...</>) : (
                 mode === "create"
                   ? "Create Task"
@@ -637,4 +754,4 @@ const renderDynamicFields =
   );
 };
 
-export default TaskForm;
+export default React.memo(TaskForm);

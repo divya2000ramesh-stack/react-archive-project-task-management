@@ -1,6 +1,7 @@
 import { combineReducers } from "redux";
 import { uiReducer } from "./uiReducers";
 import { taskReducer } from "./taskReducers";
+import { projectsReducer } from "./projectReducers";
 
 // const rootReducer = combineReducers({
 //   ui: uiReducer,
@@ -12,6 +13,7 @@ import { taskReducer } from "./taskReducers";
 const entitiesReducer =
   combineReducers({
     tasks: taskReducer,
+    projects:projectsReducer,
   });
 
 
