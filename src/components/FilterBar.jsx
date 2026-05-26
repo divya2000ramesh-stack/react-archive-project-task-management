@@ -1,7 +1,7 @@
 // Filter Bar Component
 // TODO: Implement advanced filtering controls
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { TASK_TYPES, PRIORITIES, STATUSES } from '../api/mockApi';
 
 const FilterBar = ({ 
@@ -24,6 +24,25 @@ const FilterBar = ({
   const [searchInput, setSearchInput] = React.useState(filters.search || '');
 
   // TODO: Implement debounced search with useEffect and setTimeout
+
+  useEffect(() => {
+
+    const timer =
+      setTimeout(() => {
+
+        onFiltersChange({
+          ...filters,
+
+          search:
+            searchInput,
+        });
+
+      }, 500);
+
+    return () =>
+      clearTimeout(timer);
+
+  }, [searchInput]);
 
   const handleFilterChange = (filterKey, value) => {
     onFiltersChange({
